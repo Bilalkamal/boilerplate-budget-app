@@ -45,12 +45,29 @@ class Category:
 
 
 def create_spend_chart(categories):
-    print("Percentage spent by category")
-    total_spending = 0
+    chart = 'Percentage spent by category\n'
+    withdrawls, total = {}, 0
     for cat in categories:
-        print(f'Category: {cat.name}, Spending: {cat.spending}')
-        total_spending += cat.spending
-    
-    print(total_spending)
-    
-    
+        withdrawls[cat.name] = 0
+        for movement in cat.ledger:
+            if movement['amount'] < 0:withdrawls[cat.name] += movement['amount']
+        withdrawls[cat.name] = -withdrawls[cat.name]
+        total += withdrawls[cat.name]
+    for name in withdrawls:
+        withdrawls[name] = int(withdrawls[name]*100/total)
+    for i in range (100, -10, -10):
+        chart+= str(i).rjust(3) + '| '
+        for name in withdrawls:
+            chart += 'o  ' if withdrawls[name] >= i else '   '
+        chart += '\n'
+    chart += " " * 4 + "-" * (len(withdrawls) * 3 + 1) + '\n'
+    max_len = 0
+    for cat in categories:
+        if len(cat.name) > max_len:max_len = len(cat.name)
+    for i in range(max_len):
+        chart += ' ' * 5
+        for cat in categories:
+            chart += cat.name[i] + '  ' if len(cat.name) > i else '   '
+        chart += '\n'
+    return chart[0:-1]
+
